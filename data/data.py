@@ -4,7 +4,8 @@ import torchvision
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
-
+import glob
+import cv2
 
 class CustomDataset(Dataset):
     def __init__(self, data, labels, transform=None):
@@ -23,7 +24,34 @@ class CustomDataset(Dataset):
 
         return sample, label
 
+class CustomLocalDataset(Dataset):
+    def __init__(self, path, transform):
+        self.imgs_path = path
+        self.transform = transform
+        file_list = glob.glob(self.imgs_path + "*")
+        self.data = []
+        for class_path in file_list:
+            class_name = class_path.split("/")[-1]
+            for img_path in glob.glob(class_path + "/*.jpg"):
+                self.data.append([img_path, class_name])
+            for img_path in glob.glob(class_path + "/*.jpeg"):
+                self.data.append([img_path, class_name])
+        print("found data in ", str(path), " : ", len(self.data))
+        self.class_map = {"Normal" : 0, "Benign": 1, "Malignant": 2}
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):
+        img_path, class_name = self.data[idx]
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        img = img.astype(np.float32)
+        img = img / 255.0 
+        img = self.transform(img)
+        img = transforms.ToTensor()(np.array(img))
+        label = self.class_map[class_name]
+        sample = img
 
+        return sample, label
+    
 def extract_classes(dataset, classes):
     idx = torch.zeros_like(dataset.targets, dtype=torch.bool)
     for target in classes:
@@ -49,6 +77,12 @@ def getDataset(dataset):
         transforms.Resize((32, 32)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
+        ])
+    
+    transform_pocus = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize((180, 180)),
+        transforms.RandomHorizontalFlip(),
         ])
 
     if(dataset == 'CIFAR10'):
@@ -162,6 +196,27 @@ def getDataset(dataset):
         testset = CustomDataset(test_data, test_targets, transform=transform_split_mnist)
         num_classes = 2
         inputs = 1
+
+    elif(dataset == 'POCUS'):
+        # we have different data sets (only POCUS, US and US+POCUS)
+        set_type = 'US+POCUS' # choose fro POCUS or US+POCUS
+
+        if set_type == 'POCUS':
+            train_dir  = '/home/marisa/Documents/Thesis/Data/POCUS/Train/' 
+            val_dir = '/home/marisa/Documents/Thesis/Data/POCUS/Test/'
+        elif set_type == 'US+POCUS':
+            train_dir  = '/home/marisa/Documents/Thesis/Data/POCUS_and_US/Train/' 
+            val_dir = '/home/marisa/Documents/Thesis/Data/POCUS_and_US/Test/'
+        else: 
+            print('Error: set_type not recognized')
+
+        trainset = CustomLocalDataset(train_dir, transform=transform_pocus)
+        testset = CustomLocalDataset(val_dir, transform=transform_pocus)
+        num_classes = 3
+        inputs = 1
+
+    else:
+        raise ValueError("Undefined dataset. Please specify which data set you want to use.")
 
     return trainset, testset, inputs, num_classes
 
