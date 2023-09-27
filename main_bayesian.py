@@ -15,6 +15,8 @@ import config_bayesian as cfg
 from models.BayesianModels.Bayesian3Conv3FC import BBB3Conv3FC
 from models.BayesianModels.BayesianAlexNet import BBBAlexNet
 from models.BayesianModels.BayesianLeNet import BBBLeNet
+from torchinfo import summary
+
 
 # CUDA settings
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -106,6 +108,9 @@ def run(dataset, net_type):
     train_loader, valid_loader, test_loader = data.getDataloader(
         trainset, testset, valid_size, batch_size, num_workers)
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
+
+    print("WITH INPUT SIZE 180x180")
+    print(summary(net, input_size=(batch_size, 1, 180, 180)))
 
     ckpt_dir = f'checkpoints/{dataset}/bayesian'
     ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}.pt'
