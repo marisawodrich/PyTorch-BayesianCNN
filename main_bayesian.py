@@ -130,13 +130,22 @@ def run(dataset, net_type):
         if valid_loss <= valid_loss_max:
             print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
                 valid_loss_max, valid_loss))
-            torch.save(net.state_dict(), ckpt_name)
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'train_loss': train_loss,
+                'train_acc': train_acc,
+                'valid_loss': valid_loss,
+                'valid_acc': valid_acc,
+                'train_kl_div': train_kl,
+            }, ckpt_name)
             valid_loss_max = valid_loss
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "PyTorch Bayesian Model Training")
     parser.add_argument('--net_type', default='lenet', type=str, help='model')
-    parser.add_argument('--dataset', default='MNIST', type=str, help='dataset = [MNIST/CIFAR10/CIFAR100]')
+    parser.add_argument('--dataset', default='MNIST', type=str, help='dataset = [MNIST/CIFAR10/CIFAR100/POCUS]')
     args = parser.parse_args()
 
     run(args.dataset, args.net_type)
