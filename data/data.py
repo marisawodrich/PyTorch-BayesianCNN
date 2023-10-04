@@ -78,10 +78,20 @@ def getDataset(dataset):
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         ])
-    
+    """
+    #  code in tensorflow
+    train_datagen = ImageDataGenerator( width_shift_range=0.1,
+                                            height_shift_range=0.1,
+                                            shear_range=0.1,
+                                            zoom_range=0.1,
+                                            rescale = 1./255,
+                                            horizontal_flip=True,
+                                            fill_mode='nearest')
+    """
     transform_pocus = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((180, 180)),
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
         transforms.RandomHorizontalFlip(),
         ])
 

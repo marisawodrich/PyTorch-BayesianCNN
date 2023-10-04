@@ -16,7 +16,7 @@ from models.BayesianModels.Bayesian3Conv3FC import BBB3Conv3FC
 from models.BayesianModels.BayesianAlexNet import BBBAlexNet
 from models.BayesianModels.BayesianLeNet import BBBLeNet
 from torchinfo import summary
-
+from datetime import date
 
 # CUDA settings
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -113,7 +113,7 @@ def run(dataset, net_type):
     print(summary(net, input_size=(batch_size, 1, 180, 180)))
 
     ckpt_dir = f'checkpoints/{dataset}/bayesian'
-    ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}.pt'
+    ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}.pt'
 
     if not os.path.exists(ckpt_dir):
         os.makedirs(ckpt_dir, exist_ok=True)
