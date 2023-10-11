@@ -25,13 +25,16 @@ class CustomDataset(Dataset):
         return sample, label
 
 class CustomLocalDataset(Dataset):
-    def __init__(self, path, transform):
+    def __init__(self, path, transform, source):
         self.imgs_path = path
         self.transform = transform
         file_list = glob.glob(self.imgs_path + "*")
         self.data = []
         for class_path in file_list:
-            class_name = class_path.split("/")[-1]
+            if source == 0:	
+                class_name = class_path.split("/")[-1] # for work computer (linux)
+            elif source == 1:
+                class_name = class_path.split("\\")[-1] # for laptop (windows)
             for img_path in glob.glob(class_path + "/*.jpg"):
                 self.data.append([img_path, class_name])
             for img_path in glob.glob(class_path + "/*.jpeg"):
@@ -211,17 +214,24 @@ def getDataset(dataset):
         # we have different data sets (only POCUS, US and US+POCUS)
         set_type = 'US+POCUS' # choose fro POCUS or US+POCUS
 
+        source = 1 # 0 for work computer, 1 for laptop
+
+        loc_pc = '/home/marisa/Documents/Thesis'
+        loc_lap = 'C:/Users/maris/Documents/Thesis'
+        locs = [loc_pc, loc_lap]
+        loc = locs[source]
+
         if set_type == 'POCUS':
-            train_dir  = '/home/marisa/Documents/Thesis/Data/POCUS/Train/' 
-            val_dir = '/home/marisa/Documents/Thesis/Data/POCUS/Test/'
+            train_dir  = f'{loc}/Data/POCUS/Train/' 
+            val_dir = f'{loc}/Data/POCUS/Test/'
         elif set_type == 'US+POCUS':
-            train_dir  = '/home/marisa/Documents/Thesis/Data/POCUS_and_US/Train/' 
-            val_dir = '/home/marisa/Documents/Thesis/Data/POCUS_and_US/Test/'
+            train_dir  = f'{loc}/Data/POCUS_and_US/Train/' 
+            val_dir = f'{loc}/Data/POCUS_and_US/Test/'
         else: 
             print('Error: set_type not recognized')
 
-        trainset = CustomLocalDataset(train_dir, transform=transform_pocus)
-        testset = CustomLocalDataset(val_dir, transform=transform_pocus)
+        trainset = CustomLocalDataset(train_dir, transform=transform_pocus, source=source)
+        testset = CustomLocalDataset(val_dir, transform=transform_pocus, source=source)
         num_classes = 3
         inputs = 1
 
