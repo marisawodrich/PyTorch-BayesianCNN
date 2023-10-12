@@ -17,6 +17,8 @@ from models.BayesianModels.BayesianAlexNet import BBBAlexNet
 from models.BayesianModels.BayesianLeNet import BBBLeNet
 from torchinfo import summary
 from datetime import date
+import random
+import string
 
 # CUDA settings
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -112,8 +114,10 @@ def run(dataset, net_type):
     print("WITH INPUT SIZE 180x180")
     print(summary(net, input_size=(batch_size, 1, 180, 180)))
 
+    rand = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+
     ckpt_dir = f'checkpoints/{dataset}/bayesian'
-    ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}.pt'
+    ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}_{rand}.pt'
 
     if not os.path.exists(ckpt_dir):
         os.makedirs(ckpt_dir, exist_ok=True)
@@ -125,7 +129,7 @@ def run(dataset, net_type):
     for epoch in range(n_epochs):  # loop over the dataset multiple times
 
         train_loss, train_acc, train_kl = train_model(net, optimizer, criterion, train_loader, num_ens=train_ens, beta_type=beta_type, epoch=epoch, num_epochs=n_epochs)
-        valid_loss, valid_acc = validate_model(net, criterion, valid_loader, num_ens=valid_ens, beta_type=beta_type, epoch=epoch, num_epochs=n_epochs)
+        valid_loss, valid_acc = validate_model(net, criterion, test_loader, num_ens=valid_ens, beta_type=beta_type, epoch=epoch, num_epochs=n_epochs)
         lr_sched.step(valid_loss)
 
         print('Epoch: {} \tTraining Loss: {:.4f} \tTraining Accuracy: {:.4f} \tValidation Loss: {:.4f} \tValidation Accuracy: {:.4f} \ttrain_kl_div: {:.4f}'.format(

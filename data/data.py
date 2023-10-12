@@ -214,7 +214,7 @@ def getDataset(dataset):
         # we have different data sets (only POCUS, US and US+POCUS)
         set_type = 'US+POCUS' # choose fro POCUS or US+POCUS
 
-        source = 1 # 0 for work computer, 1 for laptop
+        source = 0 # 0 for work computer, 1 for laptop
 
         loc_pc = '/home/marisa/Documents/Thesis'
         loc_lap = 'C:/Users/maris/Documents/Thesis'
