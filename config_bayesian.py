@@ -14,5 +14,5 @@ num_workers = 4
 valid_size = 0.0
 batch_size = 32
 train_ens = 15
-valid_ens = 15
+valid_ens = 5
 beta_type = 0.1  # 'Blundell', 'Standard', etc. Use float for const value
