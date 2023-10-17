@@ -119,6 +119,8 @@ def run(dataset, net_type):
     ckpt_dir = f'checkpoints/{dataset}/bayesian'
     ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}_{rand}.pt'
 
+    print("ckpt_name: ", ckpt_name)
+
     if not os.path.exists(ckpt_dir):
         os.makedirs(ckpt_dir, exist_ok=True)
 
@@ -148,6 +150,19 @@ def run(dataset, net_type):
                 'valid_loss': valid_loss,
                 'valid_acc': valid_acc,
                 'train_kl_div': train_kl,
+                'net_type': net_type,
+                # save all the hyperparameters from the config file too
+                'layer_type': layer_type,
+                'activation_type': activation_type,
+                'priors': priors,
+                'n_epochs': n_epochs,
+                'lr_start': lr_start,
+                'num_workers': num_workers,
+                'valid_size': valid_size,
+                'batch_size': batch_size,
+                'train_ens': train_ens,
+                'valid_ens': valid_ens,
+                'beta_type': beta_type
             }, ckpt_name)
             valid_loss_max = valid_loss
 

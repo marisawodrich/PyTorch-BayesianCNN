@@ -31,7 +31,7 @@ class BBBAlexNet(ModuleWrapper):
         else:
             raise ValueError("Only softplus or relu supported")
         
-        dropout = True
+        dropout = False
 
         self.conv1 = BBBConv2d(inputs, 64, 11, stride=4, padding=5, bias=True, priors=self.priors)
         self.act1 = self.act()
@@ -51,7 +51,7 @@ class BBBAlexNet(ModuleWrapper):
 
         self.conv5 = BBBConv2d(256, 128, 3, padding=1, bias=True, priors=self.priors)
         self.act5 = self.act()
-        if dropout: self.drop5 = nn.Dropout2d(p=0.5)
+        if dropout: self.drop5 = nn.Dropout2d(p=0.2)
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # uncomment for mnist or cifar10

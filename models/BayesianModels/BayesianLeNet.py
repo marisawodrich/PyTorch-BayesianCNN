@@ -39,8 +39,8 @@ class BBBLeNet(ModuleWrapper):
         self.act2 = self.act()
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.flatten = FlattenLayer(5 * 5 * 16)
-        self.fc1 = BBBLinear(5 * 5 * 16, 120, bias=True, priors=self.priors)
+        self.flatten = FlattenLayer(28224)
+        self.fc1 = BBBLinear(28224, 120, bias=True, priors=self.priors)
         self.act3 = self.act()
 
         self.fc2 = BBBLinear(120, 84, bias=True, priors=self.priors)
