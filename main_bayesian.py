@@ -15,6 +15,7 @@ import config_bayesian as cfg
 from models.BayesianModels.Bayesian3Conv3FC import BBB3Conv3FC
 from models.BayesianModels.BayesianAlexNet import BBBAlexNet
 from models.BayesianModels.BayesianLeNet import BBBLeNet
+from models.BayesianModels.BayesianCNNcustom import BBBCustom
 from torchinfo import summary
 from datetime import date
 import random
@@ -30,6 +31,8 @@ def getModel(net_type, inputs, outputs, priors, layer_type, activation_type):
         return BBBAlexNet(outputs, inputs, priors, layer_type, activation_type)
     elif (net_type == '3conv3fc'):
         return BBB3Conv3FC(outputs, inputs, priors, layer_type, activation_type)
+    elif (net_type == 'custom'):
+        return BBBCustom(outputs, inputs, priors, layer_type, activation_type)
     else:
         raise ValueError('Network should be either [LeNet / AlexNet / 3Conv3FC')
 

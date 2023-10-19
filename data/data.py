@@ -93,9 +93,9 @@ def getDataset(dataset):
     """
     transform_pocus = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((180, 180)),
-        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
-        transforms.RandomHorizontalFlip(),
+        transforms.Resize((128, 128)), # 180x180 is the originally used size of the input images
+        #transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+        #transforms.RandomHorizontalFlip(),
         ])
 
     if(dataset == 'CIFAR10'):
