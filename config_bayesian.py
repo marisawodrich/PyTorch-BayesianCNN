@@ -9,10 +9,11 @@ priors={
 }
 
 n_epochs = 40
-lr_start = 0.00001
+lr_start = 0.00005
 num_workers = 4
 valid_size = 0.0
 batch_size = 32
 train_ens = 15
 valid_ens = 1
 beta_type = 0.1  # 'Blundell', 'Standard', etc. Use float for const value
+augmentation = True # augmentation for the POCUS data set 

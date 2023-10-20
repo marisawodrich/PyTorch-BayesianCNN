@@ -108,8 +108,9 @@ def run(dataset, net_type):
     valid_size = cfg.valid_size
     batch_size = cfg.batch_size
     beta_type = cfg.beta_type
+    augmentation = cfg.augmentation
 
-    trainset, testset, inputs, outputs = data.getDataset(dataset)
+    trainset, testset, inputs, outputs = data.getDataset(dataset, augmentation)
     train_loader, valid_loader, test_loader = data.getDataloader(
         trainset, testset, valid_size, batch_size, num_workers)
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
@@ -165,7 +166,8 @@ def run(dataset, net_type):
                 'batch_size': batch_size,
                 'train_ens': train_ens,
                 'valid_ens': valid_ens,
-                'beta_type': beta_type
+                'beta_type': beta_type,
+                'augmentation': augmentation
             }, ckpt_name)
             valid_loss_max = valid_loss
 

@@ -64,7 +64,7 @@ def extract_classes(dataset, classes):
     return data, targets
 
 
-def getDataset(dataset):
+def getDataset(dataset, augmentation):
     transform_split_mnist = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((32, 32)),
@@ -81,23 +81,21 @@ def getDataset(dataset):
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         ])
-    """
-    #  code in tensorflow
-    train_datagen = ImageDataGenerator( width_shift_range=0.1,
-                                            height_shift_range=0.1,
-                                            shear_range=0.1,
-                                            zoom_range=0.1,
-                                            rescale = 1./255,
-                                            horizontal_flip=True,
-                                            fill_mode='nearest')
-    """
+
     transform_pocus = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((128, 128)), # 180x180 is the originally used size of the input images
-        #transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
-        #transforms.RandomHorizontalFlip(),
-        ])
+        ])  
 
+    transform_pocus_aug = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize((128, 128)), # 180x180 is the originally used size of the input images
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), shear=(-0.1,0.1,-0.1,0.1)), # verical and hosizontal shift range 0.1, shear range 0.1
+        # TODO: test if scale and ratio are doing the correct thing
+        transforms.RandomResizedCrop(128, scale=(0.0, 0.1), ratio=(1.0, 1.0)), # crop 128x128, scale 0.0-0.1, ratio 1-1 (for square crop)
+        transforms.RandomHorizontalFlip(),
+        ])
+    
     if(dataset == 'CIFAR10'):
         trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_cifar)
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_cifar)
@@ -229,8 +227,13 @@ def getDataset(dataset):
             val_dir = f'{loc}/Data/POCUS_and_US/Test/'
         else: 
             print('Error: set_type not recognized')
+        
+        if augmentation:
+            tr = transform_pocus_aug
+        else:
+            tr = transform_pocus
 
-        trainset = CustomLocalDataset(train_dir, transform=transform_pocus, source=source)
+        trainset = CustomLocalDataset(train_dir, transform=tr, source=source)
         testset = CustomLocalDataset(val_dir, transform=transform_pocus, source=source)
         num_classes = 3
         inputs = 1
