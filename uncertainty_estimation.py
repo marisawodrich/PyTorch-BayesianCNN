@@ -37,7 +37,6 @@ def init_dataset(notmnist_dir):
 def get_uncertainty_per_image(model, input_image, T=15, normalized=False):
     input_image = input_image.unsqueeze(0)
     input_images = input_image.repeat(T, 1, 1, 1)
-
     net_out, _ = model(input_images)
     pred = torch.mean(net_out, dim=0).cpu().detach().numpy()
     if normalized:

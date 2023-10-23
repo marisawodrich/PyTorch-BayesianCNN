@@ -55,6 +55,34 @@ class CustomLocalDataset(Dataset):
 
         return sample, label
     
+class OOD_Dataset(Dataset):
+    def __init__(self, path, transform):
+        self.imgs_path = path
+        self.transform = transform
+        self.data = []
+        class_name = "Normal" # TODO: what should we put here??
+
+        for img_path in glob.glob(self.imgs_path + "/*.jpg"):
+            self.data.append([img_path, class_name])
+        for img_path in glob.glob(self.imgs_path + "/*.jpeg"):
+            self.data.append([img_path, class_name])    
+       
+        print("found data in ", str(path), " : ", len(self.data))
+        self.class_map = {"Normal" : 0, "Benign": 1, "Malignant": 2}
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):
+        img_path, class_name = self.data[idx]
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        img = img.astype(np.float32)
+        img = img / 255.0 
+        img = self.transform(img)
+        img = transforms.ToTensor()(np.array(img))
+        label = self.class_map[class_name]
+        sample = img
+
+        return sample, label
+    
 def extract_classes(dataset, classes):
     idx = torch.zeros_like(dataset.targets, dtype=torch.bool)
     for target in classes:
@@ -64,7 +92,7 @@ def extract_classes(dataset, classes):
     return data, targets
 
 
-def getDataset(dataset, augmentation):
+def getDataset(dataset, augmentation, imgsize=180):
     transform_split_mnist = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((32, 32)),
@@ -84,15 +112,14 @@ def getDataset(dataset, augmentation):
 
     transform_pocus = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((128, 128)), # 180x180 is the originally used size of the input images
+        transforms.Resize((imgsize, imgsize)), # 180x180 is the originally used size of the input images
         ])  
 
     transform_pocus_aug = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((128, 128)), # 180x180 is the originally used size of the input images
-        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), shear=(-0.1,0.1,-0.1,0.1)), # verical and hosizontal shift range 0.1, shear range 0.1
-        # TODO: test if scale and ratio are doing the correct thing
-        transforms.RandomResizedCrop(128, scale=(0.0, 0.1), ratio=(1.0, 1.0)), # crop 128x128, scale 0.0-0.1, ratio 1-1 (for square crop)
+        transforms.Resize((imgsize, imgsize)), # 180x180 is the originally used size of the input images
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), shear=(-1.0,1.0,-1.0,1.0)), # verical and horizontal shift range 0.1, shear range 0.1
+        transforms.RandomResizedCrop(imgsize, scale=(0.8, 1.0), ratio=(1.0, 1.0)), # crop 128x128, scale 0.8-1.0, ratio 1-1 (for square crop)
         transforms.RandomHorizontalFlip(),
         ])
     
@@ -234,7 +261,27 @@ def getDataset(dataset, augmentation):
             tr = transform_pocus
 
         trainset = CustomLocalDataset(train_dir, transform=tr, source=source)
-        testset = CustomLocalDataset(val_dir, transform=transform_pocus, source=source)
+        testset = CustomLocalDataset(val_dir, transform=tr, source=source)
+        num_classes = 3
+        inputs = 1
+
+    elif(dataset == 'OOD'):
+
+        source = 0 # 0 for work computer, 1 for laptop
+
+        loc_pc = '/home/marisa/Documents/Thesis/Data/OOD-examples/'
+        loc_lap = 'C:/Users/maris/Documents/Thesis/Data/OOD-examples/'
+        locs = [loc_pc, loc_lap]
+        test_dir = locs[source]
+
+        if augmentation:
+            tr = transform_pocus_aug
+        else:
+            tr = transform_pocus
+
+        trainset = OOD_Dataset(test_dir, transform=tr) # we don't use this
+        print('length of train set: ', len(trainset))
+        testset = OOD_Dataset(test_dir, transform=tr)
         num_classes = 3
         inputs = 1
 

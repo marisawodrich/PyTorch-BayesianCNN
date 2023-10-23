@@ -94,6 +94,7 @@ def validate_model(net, criterion, validloader, num_ens=1, beta_type=0.1, epoch=
 
 
 def run(dataset, net_type):
+    torch.cuda.empty_cache()
 
     # Hyper Parameter settings
     layer_type = cfg.layer_type
@@ -109,8 +110,9 @@ def run(dataset, net_type):
     batch_size = cfg.batch_size
     beta_type = cfg.beta_type
     augmentation = cfg.augmentation
+    imgsize = cfg.imgsize
 
-    trainset, testset, inputs, outputs = data.getDataset(dataset, augmentation)
+    trainset, testset, inputs, outputs = data.getDataset(dataset, augmentation, imgsize)
     train_loader, valid_loader, test_loader = data.getDataloader(
         trainset, testset, valid_size, batch_size, num_workers)
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
@@ -167,7 +169,8 @@ def run(dataset, net_type):
                 'train_ens': train_ens,
                 'valid_ens': valid_ens,
                 'beta_type': beta_type,
-                'augmentation': augmentation
+                'augmentation': augmentation,
+                'imgsize': imgsize
             }, ckpt_name)
             valid_loss_max = valid_loss
 
