@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 import glob
 import cv2
+import config_bayesian as cfg
 
 class CustomDataset(Dataset):
     def __init__(self, data, labels, transform=None):
@@ -92,7 +93,8 @@ def extract_classes(dataset, classes):
     return data, targets
 
 
-def getDataset(dataset, augmentation, imgsize=180):
+def getDataset(dataset):
+    imgsize = cfg.imgsize
     transform_split_mnist = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((32, 32)),
@@ -239,7 +241,7 @@ def getDataset(dataset, augmentation, imgsize=180):
         # we have different data sets (only POCUS, US and US+POCUS)
         set_type = 'US+POCUS' # choose fro POCUS or US+POCUS
 
-        source = 0 # 0 for work computer, 1 for laptop
+        source = cfg.source # 0 for work computer, 1 for laptop
 
         loc_pc = '/home/marisa/Documents/Thesis'
         loc_lap = 'C:/Users/maris/Documents/Thesis'
@@ -255,7 +257,7 @@ def getDataset(dataset, augmentation, imgsize=180):
         else: 
             print('Error: set_type not recognized')
         
-        if augmentation:
+        if cfg.augmentation:
             tr = transform_pocus_aug
         else:
             tr = transform_pocus
@@ -267,14 +269,14 @@ def getDataset(dataset, augmentation, imgsize=180):
 
     elif(dataset == 'OOD'):
 
-        source = 0 # 0 for work computer, 1 for laptop
+        source = cfg.source # 0 for work computer, 1 for laptop
 
         loc_pc = '/home/marisa/Documents/Thesis/Data/OOD-examples/'
         loc_lap = 'C:/Users/maris/Documents/Thesis/Data/OOD-examples/'
         locs = [loc_pc, loc_lap]
         test_dir = locs[source]
 
-        if augmentation:
+        if cfg.augmentation:
             tr = transform_pocus_aug
         else:
             tr = transform_pocus

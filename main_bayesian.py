@@ -112,7 +112,7 @@ def run(dataset, net_type):
     augmentation = cfg.augmentation
     imgsize = cfg.imgsize
 
-    trainset, testset, inputs, outputs = data.getDataset(dataset, augmentation, imgsize)
+    trainset, testset, inputs, outputs = data.getDataset(dataset)
     train_loader, valid_loader, test_loader = data.getDataloader(
         trainset, testset, valid_size, batch_size, num_workers)
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
