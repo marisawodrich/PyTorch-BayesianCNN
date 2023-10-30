@@ -24,7 +24,7 @@ import string
 # CUDA settings
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def getModel(net_type, inputs, outputs, priors, layer_type, activation_type):
+def getModel(net_type, inputs, outputs, priors, layer_type, activation_type, imgsize=None):
     if (net_type == 'lenet'):
         return BBBLeNet(outputs, inputs, priors, layer_type, activation_type)
     elif (net_type == 'alexnet'):
@@ -32,7 +32,7 @@ def getModel(net_type, inputs, outputs, priors, layer_type, activation_type):
     elif (net_type == '3conv3fc'):
         return BBB3Conv3FC(outputs, inputs, priors, layer_type, activation_type)
     elif (net_type == 'custom'):
-        return BBBCustom(outputs, inputs, priors, layer_type, activation_type)
+        return BBBCustom(outputs, inputs, priors, layer_type, activation_type, imgsize=imgsize)
     else:
         raise ValueError('Network should be either [LeNet / AlexNet / 3Conv3FC')
 
@@ -118,7 +118,7 @@ def run(dataset, net_type):
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
 
     print("WITH INPUT SIZE 180x180")
-    print(summary(net, input_size=(batch_size, 1, 180, 180)))
+    print(summary(net, input_size=(1, 1, 180, 180)))
 
     rand = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
@@ -134,6 +134,7 @@ def run(dataset, net_type):
     optimizer = Adam(net.parameters(), lr=lr_start)
     lr_sched = lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True)
     valid_loss_max = np.Inf
+    valid_acc_max = 0
     for epoch in range(n_epochs):  # loop over the dataset multiple times
 
         train_loss, train_acc, train_kl = train_model(net, optimizer, criterion, train_loader, num_ens=train_ens, beta_type=beta_type, epoch=epoch, num_epochs=n_epochs)
@@ -144,9 +145,12 @@ def run(dataset, net_type):
             epoch, train_loss, train_acc, valid_loss, valid_acc, train_kl))
 
         # save model if validation accuracy has increased
-        if valid_loss <= valid_loss_max:
-            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
-                valid_loss_max, valid_loss))
+        #if valid_loss <= valid_loss_max:
+        #    print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+        #        valid_loss_max, valid_loss))
+        if valid_acc >= valid_acc_max:
+            print('Validation accuracy increased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+                valid_acc_max, valid_acc))
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': net.state_dict(),
@@ -173,6 +177,7 @@ def run(dataset, net_type):
                 'imgsize': imgsize
             }, ckpt_name)
             valid_loss_max = valid_loss
+            valid_acc_max = valid_acc
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "PyTorch Bayesian Model Training")

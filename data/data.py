@@ -77,6 +77,8 @@ class OOD_Dataset(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         img = img.astype(np.float32)
         img = img / 255.0 
+        # normalize with mean and std of the image
+        #img = (img - np.mean(img)) / np.std(img) # new
         img = self.transform(img)
         img = transforms.ToTensor()(np.array(img))
         label = self.class_map[class_name]

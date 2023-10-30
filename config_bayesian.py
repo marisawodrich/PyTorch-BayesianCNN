@@ -8,15 +8,15 @@ priors={
     'posterior_rho_initial': (-5, 0.1),  # (mean, std) normal_
 }
 
-n_epochs = 40
-lr_start = 0.00005
+n_epochs = 60
+lr_start = 0.001
 num_workers = 4
 valid_size = 0.0
 batch_size = 32
-train_ens = 20
-valid_ens = 10
+train_ens = 15
+valid_ens = 5
 beta_type = 0.1  # 'Blundell', 'Standard', etc. Use float for const value
-augmentation = False # augmentation for the POCUS data set 
-imgsize = 128 # image size for the POCUS data set
+augmentation = True # augmentation for the POCUS data set 
+imgsize = 180 # image size for the POCUS data set
 
-source = 1 # 0 for work pc, 1 for laptop
+source = 0 # 0 for work pc, 1 for laptop
