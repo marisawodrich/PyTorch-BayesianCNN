@@ -69,7 +69,7 @@ class OOD_Dataset(Dataset):
             self.data.append([img_path, class_name])    
        
         print("found data in ", str(path), " : ", len(self.data))
-        self.class_map = {"Normal" : 0, "Benign": 1, "Malignant": 2}
+        self.class_map = {"Normal" : 2, "Benign": 0, "Malignant": 1}
     def __len__(self):
         return len(self.data)
     def __getitem__(self, idx):
@@ -99,12 +99,14 @@ def getDataset(dataset):
     imgsize = cfg.imgsize
     transform_split_mnist = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((32, 32)),
+        #transforms.Resize((32, 32)),
+        transforms.Resize((imgsize, imgsize)),
         transforms.ToTensor(),
         ])
 
     transform_mnist = transforms.Compose([
-        transforms.Resize((32, 32)),
+        #transforms.Resize((32, 32)),
+        transforms.Resize((imgsize, imgsize)),
         transforms.ToTensor(),
         ])
 
@@ -142,8 +144,10 @@ def getDataset(dataset):
     elif(dataset == 'MNIST'):
         trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_mnist)
         testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform_mnist)
-        num_classes = 10
+        #num_classes = 10
+        num_classes = 3 # for POCUS
         inputs = 1
+        print('length of MNIST test set: ', len(testset))
 
     elif(dataset == 'SplitMNIST-2.1'):
         trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_mnist)
@@ -245,6 +249,8 @@ def getDataset(dataset):
 
         source = cfg.source # 0 for work computer, 1 for laptop
 
+        datasetversion = cfg.datasetversion # 'new' for new data set, 'old' for old data set
+
         loc_pc = '/home/marisa/Documents/Thesis'
         loc_lap = 'C:/Users/maris/Documents/Thesis'
         locs = [loc_pc, loc_lap]
@@ -254,8 +260,14 @@ def getDataset(dataset):
             train_dir  = f'{loc}/Data/POCUS/Train/' 
             val_dir = f'{loc}/Data/POCUS/Test/'
         elif set_type == 'US+POCUS':
-            train_dir  = f'{loc}/Data/POCUS_and_US/Train/' 
-            val_dir = f'{loc}/Data/POCUS_and_US/Test/'
+            if datasetversion == 'new':
+                train_dir  = f'{loc}/Data/Data_Dec_1/POCUS_and_US/Train/'
+                val_dir = f'{loc}/Data/Data_Dec_1/POCUS_and_US/Test/'
+            elif datasetversion == 'old':
+                train_dir  = f'{loc}/Data/POCUS_and_US/Train/' # old training set
+                val_dir = f'{loc}/Data/DATA_FOR_ISBI/GE_Test/'
+            else:
+                print('Error: datasetversion not recognized')
         else: 
             print('Error: set_type not recognized')
         
@@ -286,6 +298,40 @@ def getDataset(dataset):
         trainset = OOD_Dataset(test_dir, transform=tr) # we don't use this
         print('length of train set: ', len(trainset))
         testset = OOD_Dataset(test_dir, transform=tr)
+        num_classes = 3
+        inputs = 1
+
+    elif(dataset == 'OOD_CCA_US'):
+
+        source = cfg.source # 0 for work computer, 1 for laptop
+
+        loc_pc = '/home/marisa/Documents/Thesis/Data/DATA_FOR_ISBI/CCA_US/OOD/'
+        loc_lap = 'C:/Users/maris/Documents/Thesis/Data/DATA_FOR_ISBI/CCA_US/OOD/'
+        locs = [loc_pc, loc_lap]
+        test_dir = locs[source]
+
+        if cfg.augmentation:
+            tr = transform_pocus_aug
+        else:
+            tr = transform_pocus
+
+        trainset = OOD_Dataset(test_dir, transform=tr) # we don't use this
+        print('length of train set: ', len(trainset))
+        testset = OOD_Dataset(test_dir, transform=tr)
+        num_classes = 3
+        inputs = 1
+
+    elif(dataset == 'OOD_combo'):
+        loc = '/home/marisa/Documents/Thesis/Data/DATA_FOR_ISBI/Combo/'
+        source = cfg.source
+         # print the files in the test_dir
+        if cfg.augmentation:
+            tr = transform_pocus_aug
+        else:
+            tr = transform_pocus
+        trainset = CustomLocalDataset(loc, transform=tr, source=source) # we don't use this
+        testset = CustomLocalDataset(loc, transform=tr, source=source)
+        print('length of OOD set: ', len(testset))
         num_classes = 3
         inputs = 1
 

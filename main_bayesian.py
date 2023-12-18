@@ -96,6 +96,9 @@ def validate_model(net, criterion, validloader, num_ens=1, beta_type=0.1, epoch=
 def run(dataset, net_type):
     torch.cuda.empty_cache()
 
+    # print the device used
+    print("Device used: ", device)
+
     # Hyper Parameter settings
     layer_type = cfg.layer_type
     activation_type = cfg.activation_type
@@ -117,13 +120,13 @@ def run(dataset, net_type):
         trainset, testset, valid_size, batch_size, num_workers)
     net = getModel(net_type, inputs, outputs, priors, layer_type, activation_type).to(device)
 
-    print("WITH INPUT SIZE 180x180")
-    print(summary(net, input_size=(1, 1, 180, 180)))
+    print("WITH INPUT SIZE ", cfg.imgsize)
+    print(summary(net, input_size=(1, 1, cfg.imgsize, cfg.imgsize)))
 
     rand = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
     ckpt_dir = f'checkpoints/{dataset}/bayesian'
-    ckpt_name = f'checkpoints/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}_{rand}.pt'
+    ckpt_name = f'checkpoints/newDataSet/{dataset}/bayesian/model_{net_type}_{layer_type}_{activation_type}_{date.today()}_{rand}.pt'
 
     print("ckpt_name: ", ckpt_name)
 
